@@ -9,6 +9,7 @@ require 'fedex/request/ground_close'
 require 'fedex/request/pickup'
 require 'fedex/request/pickup_availability'
 require 'fedex/request/service_availability'
+require 'fedex/request/notification'
 
 module Fedex
   class Shipment
@@ -109,6 +110,14 @@ module Fedex
     # param [String] carrier_code, A string containing carrier code
     def service_availability(options = {})
       Request::ServiceAvailability.new(@credentials, options).process_request
+    end
+
+    # @param [String] tracking_number, A string with the requested tracking number
+    # @param [String] sender_email_address, A string with sender email
+    # @param [String] sender_name, A string with the sender name
+    # @param [String] recipient_email, A string with the recipient email
+    def notification(options = {})
+      Request::Notification.new(@credentials, options).process_request
     end
 
   end

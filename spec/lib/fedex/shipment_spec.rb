@@ -83,4 +83,34 @@ describe Fedex::Request::Shipment do
     end
 
   end
+
+  describe 'notification' do
+    let(:fedex) { Fedex::Shipment.new(fedex_credentials) }
+    let(:tracking_number) { "076701350289642" }
+    let(:sender_email_address) { "no-reply@company.com" }
+    let(:sender_name) { "Company" }
+    let(:recipient_email) { "customer@mail.com" }
+
+    let(:options) do
+      { :tracking_number => tracking_number, :sender_email_address => sender_email_address, :sender_name => sender_name, :recipient_email => recipient_email }
+    end
+
+    context 'with valid tracking_number' do
+      it 'success' do
+        expect {
+          notification = fedex.notification(options)
+        }.to_not raise_error
+      end
+    end
+
+    context 'with invalid tracking_number' do
+      let(:tracking_number) { "1234567890123" }
+      it 'raises error' do
+        expect {
+          @notification = fedex.notification(options)
+        }.to raise_error('This tracking number cannot be found. Please check the number or contact the sender.')
+      end
+    end
+
+  end
 end

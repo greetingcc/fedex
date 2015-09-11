@@ -139,7 +139,7 @@ Fedex provides multiple total values; `total_net_charge` is the final amount you
           @total_net_freight="32.1",
           @rate_zone="51">
 ```
-### ** Get a Transit time **
+### ** Create a shipment and Get a Transit time(please note this will generate a shipment in your Fedex account if you are using production mode) **
 ```ruby
 ship = fedex.ship(:shipper=>shipper,
                   :recipient => recipient,
@@ -387,6 +387,19 @@ fedex_service_hash = {:origin => origin, :destination => destination, :ship_date
 service = fedex.service_availability(fedex_service_hash)
 
 puts service[:options]
+```
+
+### ** Requesting a Notification **
+
+Send notification to an recipient email
+
+```ruby
+notification = fedex.notification(:tracking_number => "1234567890123",
+                              :sender_email_address => "no-reply@company.com",
+                              :sender_name => "Company",
+                              :recipient_email => "customer@mail.com")
+
+puts notification
 ```
 
 # Services/Options Available
