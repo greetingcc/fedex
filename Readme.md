@@ -1,3 +1,6 @@
+# IMPORTANT!!
+I plan a major refactor to this gem. Sorry but at this moment I am not merging PR's. I appreciate your effort but need some time to catch up. Thanks!! 
+
 # Fedex Rate Web Service
 ## Fedex API Shipment Version: 13
 
@@ -353,7 +356,8 @@ To request a pickup:
 pickup = fedex.pickup(:carrier_code => 'FDXE',
                       :packages => {:weight => {:units => "LB", :value => 10}, :count => 2},
                       :ready_timestamp => Date.today.to_datetime + 1.375,
-                      :close_time => Date.today.to_time + 60 * 60 * 17)
+                      :close_time => Date.today.to_time + 60 * 60 * 17,
+                      :country_relationship => "DOMESTIC")
 puts pickup[:pickup_confirmation_number]
 ```
 

@@ -44,6 +44,7 @@ module Fedex
           xml.PackagingType @shipping_options[:packaging_type] ||= "YOUR_PACKAGING"
           add_total_weight(xml) if @mps.has_key? :total_weight
           add_shipper(xml)
+          add_origin(xml) if @origin
           add_recipient(xml)
           add_shipping_charges_payment(xml)
           add_special_services(xml) if @shipping_options[:return_reason] || @shipping_options[:cod] || @shipping_options[:saturday_delivery]
@@ -68,13 +69,32 @@ module Fedex
         add_label_specification xml
       end
 
-      # Add the label specification
+     # Add the label specification
       def add_label_specification(xml)
         xml.LabelSpecification {
           xml.LabelFormatType @label_specification[:label_format_type]
           xml.ImageType @label_specification[:image_type]
           xml.LabelStockType @label_specification[:label_stock_type]
           xml.CustomerSpecifiedDetail{ hash_to_xml(xml, @customer_specified_detail) } if @customer_specified_detail
+
+          if @label_specification[:printed_label_origin] && @label_specification[:printed_label_origin][:address]
+            xml.PrintedLabelOrigin {
+              xml.Contact {
+                xml.PersonName @label_specification[:printed_label_origin][:address][:name]
+                xml.CompanyName @label_specification[:printed_label_origin][:address][:company]
+                xml.PhoneNumber @label_specification[:printed_label_origin][:address][:phone_number]
+              }
+              xml.Address {
+                Array(@label_specification[:printed_label_origin][:address][:address]).each do |address_line|
+                  xml.StreetLines address_line
+                end
+                xml.City @label_specification[:printed_label_origin][:address][:city]
+                xml.StateOrProvinceCode @label_specification[:printed_label_origin][:address][:state]
+                xml.PostalCode @label_specification[:printed_label_origin][:address][:postal_code]
+                xml.CountryCode @label_specification[:printed_label_origin][:address][:country_code]
+              }
+            }
+          end
         }
       end
 

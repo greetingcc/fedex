@@ -51,6 +51,7 @@ module Fedex
         requires!(options, :shipper, :recipient, :packages)
         @credentials = credentials
         @shipper, @recipient, @packages, @service_type, @customs_clearance_detail, @debug = options[:shipper], options[:recipient], options[:packages], options[:service_type], options[:customs_clearance_detail], options[:debug]
+        @origin = options[:origin]
         @debug = ENV['DEBUG'] == 'true'
         @shipping_options =  options[:shipping_options] ||={}
         @payment_options = options[:payment_options] ||={}
@@ -138,6 +139,26 @@ module Fedex
             xml.StateOrProvinceCode @shipper[:state]
             xml.PostalCode @shipper[:postal_code]
             xml.CountryCode @shipper[:country_code]
+          }
+        }
+      end
+
+      # Add shipper to xml request
+      def add_origin(xml)
+        xml.Origin{
+          xml.Contact{
+            xml.PersonName @origin[:name]
+            xml.CompanyName @origin[:company]
+            xml.PhoneNumber @origin[:phone_number]
+          }
+          xml.Address {
+            Array(@origin[:address]).take(2).each do |address_line|
+              xml.StreetLines address_line
+            end
+            xml.City @origin[:city]
+            xml.StateOrProvinceCode @origin[:state]
+            xml.PostalCode @origin[:postal_code]
+            xml.CountryCode @origin[:country_code]
           }
         }
       end
@@ -230,14 +251,16 @@ module Fedex
               }
             end
             add_customer_references(xml, package)
-            if package[:special_services_requested] && package[:special_services_requested][:special_service_types]
+            if package[:special_services_requested]
               xml.SpecialServicesRequested{
-                if package[:special_services_requested][:special_service_types].is_a? Array
-                  package[:special_services_requested][:special_service_types].each do |type|
-                    xml.SpecialServiceTypes type
+                if package[:special_services_requested][:special_service_types]
+                  if package[:special_services_requested][:special_service_types].is_a? Array
+                    package[:special_services_requested][:special_service_types].each do |type|
+                      xml.SpecialServiceTypes type
+                    end
+                  else
+                    xml.SpecialServiceTypes package[:special_services_requested][:special_service_types]
                   end
-                else
-                  xml.SpecialServiceTypes package[:special_services_requested][:special_service_types]
                 end
                 # Handle COD Options
                 if package[:special_services_requested][:cod_detail]
@@ -349,7 +372,7 @@ module Fedex
 
       # Parse response, convert keys to underscore symbols
       def parse_response(response)
-        response = sanitize_response_keys(response)
+        response = sanitize_response_keys(response.parsed_response)
       end
 
       # Recursively sanitizes the response object by cleaning up any hash keys.
